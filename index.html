@@ -112,7 +112,7 @@
 <header class="hero"><div class="wrap">
   <span class="chip">🔒 100% in your browser — nothing is uploaded</span>
   <h1>Move an API spec <span class="grad">between any two versions</span></h1>
-  <p class="sub">Paste a Swagger 2.0 or OpenAPI 3.0 / 3.1 spec and get any other version back — validated, and honest about anything that can’t be carried across. No account, no upload, no install.</p>
+  <p class="sub">Paste OpenAPI/Swagger, Postman, GraphQL, gRPC, AsyncAPI, RAML or API Blueprint — and get any other format back, validated and honest about anything that can’t be carried across. No account, no upload, no install.</p>
   <div class="cta">
     <a class="btn primary" href="./app/">Open the converter →</a>
     <a class="btn ghost" href="#how">How it works</a>
@@ -141,9 +141,10 @@
   <p class="lead">Rather than a maze of pairwise converters, every spec is normalised into one canonical representation — <b>OpenAPI 3.1</b> — and then written out to whatever you asked for. Add a format once as an importer and an exporter, and it converts to and from everything else.</p>
   <div class="hub">
     <div class="col">
-      <div class="node">Swagger 2.0</div>
-      <div class="node">OpenAPI 3.0</div>
-      <div class="node">OpenAPI 3.1</div>
+      <div class="node">OpenAPI / Swagger</div>
+      <div class="node">Postman</div>
+      <div class="node">GraphQL · gRPC</div>
+      <div class="node">AsyncAPI · RAML · API Blueprint</div>
     </div>
     <div style="text-align:center">
       <div class="arrow" style="font-size:22px">→</div>
@@ -151,9 +152,10 @@
       <div class="arrow" style="font-size:22px">→</div>
     </div>
     <div class="col">
-      <div class="node">Swagger 2.0</div>
-      <div class="node">OpenAPI 3.0</div>
-      <div class="node">OpenAPI 3.1</div>
+      <div class="node">OpenAPI / Swagger</div>
+      <div class="node">Postman</div>
+      <div class="node">GraphQL · gRPC</div>
+      <div class="node">AsyncAPI · RAML · API Blueprint</div>
     </div>
   </div>
   <div class="steps">
@@ -170,7 +172,7 @@
   <div class="grid g3">
     <div class="card"><span class="tag t-full">Full / High</span><h3 style="margin-top:10px">OpenAPI 2.0 → 3.0 → 3.1</h3><p>Version upgrades within the OpenAPI family carry everything across.</p></div>
     <div class="card"><span class="tag t-lossy">Lossy (flagged)</span><h3 style="margin-top:10px">3.1 → 3.0 → 2.0</h3><p>Type unions, webhooks, multiple examples, JSON-Schema-2020 keywords, callbacks — each collapse or drop is warned.</p></div>
-    <div class="card"><span class="tag t-soon">Coming</span><h3 style="margin-top:10px">Beyond OpenAPI</h3><p>Postman, RAML, AsyncAPI, GraphQL and gRPC are recognised today and honestly marked “not supported yet.”</p></div>
+    <div class="card"><span class="tag t-lossy">Best-effort</span><h3 style="margin-top:10px">Beyond OpenAPI</h3><p>Postman, AsyncAPI, GraphQL, gRPC, RAML and API Blueprint convert too — structurally different formats, mapped best-effort with clear warnings.</p></div>
   </div>
 </div></section>
 
@@ -183,8 +185,12 @@
       <tr><td>Swagger 2.0</td><td>Yes</td><td>Yes (lossy)</td><td><span class="tag t-full">Live</span></td></tr>
       <tr><td>OpenAPI 3.0.x</td><td>Yes</td><td>Yes</td><td><span class="tag t-full">Live</span></td></tr>
       <tr><td>OpenAPI 3.1.x</td><td>Yes</td><td>Yes</td><td><span class="tag t-full">Live</span></td></tr>
-      <tr><td>Postman / RAML / AsyncAPI</td><td>Detected</td><td>—</td><td><span class="tag t-soon">Planned</span></td></tr>
-      <tr><td>GraphQL SDL / gRPC (proto)</td><td>Detected</td><td>—</td><td><span class="tag t-soon">Planned</span></td></tr>
+      <tr><td>Postman Collection v2.1</td><td>Yes</td><td>Yes</td><td><span class="tag t-lossy">Best-effort</span></td></tr>
+      <tr><td>AsyncAPI 2.x / 3.x</td><td>Yes</td><td>Yes</td><td><span class="tag t-lossy">Best-effort</span></td></tr>
+      <tr><td>GraphQL SDL</td><td>Yes</td><td>Yes</td><td><span class="tag t-lossy">Best-effort</span></td></tr>
+      <tr><td>gRPC / Protobuf (proto3)</td><td>Yes</td><td>Yes</td><td><span class="tag t-lossy">Best-effort</span></td></tr>
+      <tr><td>RAML 1.0 / 0.8</td><td>Yes</td><td>Yes</td><td><span class="tag t-lossy">Best-effort</span></td></tr>
+      <tr><td>API Blueprint</td><td>Yes</td><td>Yes</td><td><span class="tag t-lossy">Best-effort</span></td></tr>
     </tbody>
   </table></div>
 </div></section>
