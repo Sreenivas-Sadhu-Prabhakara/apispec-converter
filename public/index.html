@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>API Spec Converter — convert any OpenAPI/Swagger version to any other, in your browser</title>
+<meta name="description" content="A free, 100%-client-side converter between Swagger 2.0 and OpenAPI 3.0 / 3.1. Nothing is uploaded; every lossy conversion is flagged honestly." />
+<meta property="og:title" content="API Spec Converter" />
+<meta property="og:description" content="Convert Swagger 2.0 ↔ OpenAPI 3.0 ↔ 3.1 entirely in your browser. Private, honest about fidelity, no account." />
+<meta property="og:type" content="website" />
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161c2b; --panel2:#1c2438; --ink:#e6eaf2; --muted:#9aa6bd;
+    --line:#29344b; --accent:#17b7a6; --accent-ink:#062e2a; --lossy:#e0a83a; --error:#e5615e;
+    --full:#38b48a; --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:12px 20px;
+    font-weight:600;font-size:15px;border:1px solid var(--line);cursor:pointer;transition:.15s}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .btn.primary:hover{filter:brightness(1.08);text-decoration:none}
+  .btn.ghost{background:var(--panel2);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--accent);text-decoration:none}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.85);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .brand .mark{width:32px;height:32px;display:grid;place-items:center;background:var(--accent);
+    color:var(--accent-ink);border-radius:8px;font-size:18px}
+
+  /* hero */
+  header.hero{padding:72px 0 48px;text-align:center;
+    background:radial-gradient(60% 120% at 50% -10%,rgba(23,183,166,.12),transparent 60%)}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--accent);
+    border:1px solid var(--line);background:var(--panel2);padding:6px 12px;border-radius:999px}
+  h1{font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-.02em;margin:22px 0 0;
+    max-width:16ch;margin-left:auto;margin-right:auto}
+  h1 .grad{background:linear-gradient(90deg,var(--accent),#5ad0c2);-webkit-background-clip:text;
+    background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:clamp(16px,2.4vw,20px);max-width:56ch;margin:20px auto 0}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+  .versions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:40px;color:var(--muted);font-size:14px}
+  .pill{border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:var(--panel)}
+  .arrow{align-self:center;color:var(--accent)}
+
+  section{padding:56px 0;border-top:1px solid var(--line)}
+  .eyebrow{color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+  h2{font-size:clamp(24px,3.4vw,32px);letter-spacing:-.01em;margin:8px 0 0}
+  .lead{color:var(--muted);max-width:62ch;margin-top:12px}
+
+  .grid{display:grid;gap:18px;margin-top:32px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .card h3{margin:0 0 6px;font-size:17px}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .card .ic{font-size:22px}
+
+  /* hub diagram */
+  .hub{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;margin-top:32px}
+  .col{display:flex;flex-direction:column;gap:8px}
+  .node{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 12px;
+    font-size:13.5px;text-align:center}
+  .hubcore{border:1px solid var(--accent);background:rgba(23,183,166,.1);color:var(--ink);
+    border-radius:14px;padding:20px 16px;text-align:center;min-width:150px}
+  .hubcore b{color:var(--accent);display:block;font-size:15px}
+  .hubcore span{color:var(--muted);font-size:12.5px}
+
+  table{width:100%;border-collapse:collapse;margin-top:24px;font-size:14px;overflow:hidden;
+    border:1px solid var(--line);border-radius:12px}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel);color:var(--muted);font-weight:600;font-size:12.5px;
+    text-transform:uppercase;letter-spacing:.05em}
+  td .tag{font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line)}
+  .t-full{color:var(--full);border-color:var(--full)} .t-lossy{color:var(--lossy);border-color:var(--lossy)}
+  .t-soon{color:var(--muted)}
+  .scroll{overflow-x:auto}
+
+  .steps{counter-reset:s;margin-top:24px;display:grid;gap:14px}
+  .step{display:flex;gap:14px;align-items:flex-start}
+  .step .n{counter-increment:s;flex:none;width:30px;height:30px;border-radius:8px;background:var(--panel2);
+    border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);font-weight:700;font-size:14px}
+  .step .n::before{content:counter(s)}
+  .step b{display:block} .step span{color:var(--muted);font-size:14.5px}
+
+  .final{text-align:center;background:radial-gradient(60% 140% at 50% 0%,rgba(23,183,166,.12),transparent 60%)}
+  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:13.5px}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  @media(max-width:760px){
+    .g3,.g2{grid-template-columns:1fr}
+    .hub{grid-template-columns:1fr;gap:12px}
+    .arrow{transform:rotate(90deg)}
+  }
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <span class="brand"><span class="mark">⇄</span> API Spec Converter</span>
+  <a class="btn primary" href="./app/">Open the converter →</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="chip">🔒 100% in your browser — nothing is uploaded</span>
+  <h1>Move an API spec <span class="grad">between any two versions</span></h1>
+  <p class="sub">Paste a Swagger 2.0 or OpenAPI 3.0 / 3.1 spec and get any other version back — validated, and honest about anything that can’t be carried across. No account, no upload, no install.</p>
+  <div class="cta">
+    <a class="btn primary" href="./app/">Open the converter →</a>
+    <a class="btn ghost" href="#how">How it works</a>
+  </div>
+  <div class="versions">
+    <span class="pill">Swagger 2.0</span><span class="arrow">↔</span>
+    <span class="pill">OpenAPI 3.0</span><span class="arrow">↔</span>
+    <span class="pill">OpenAPI 3.1</span>
+  </div>
+</div></header>
+
+<section id="what"><div class="wrap">
+  <p class="eyebrow">What it is</p>
+  <h2>A converter that runs entirely on your machine</h2>
+  <p class="lead">Migrating an API description between spec versions usually means installing a toolchain or pasting your spec into someone’s server. This does it in the browser tab — instantly, and privately.</p>
+  <div class="grid g3">
+    <div class="card"><div class="ic">🔒</div><h3>Private by design</h3><p>Parsing and conversion happen locally in a Web Worker. Your spec never leaves the page — verified: a full conversion fires zero network requests.</p></div>
+    <div class="card"><div class="ic">⚖️</div><h3>Honest about fidelity</h3><p>Downgrades lose features. Every dropped or approximated construct is surfaced as a warning — you’re never handed a silently-broken spec.</p></div>
+    <div class="card"><div class="ic">✅</div><h3>Valid output</h3><p>Conversions are tested against a real OpenAPI/Swagger validator, with a regression suite covering the awkward edge cases.</p></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <p class="eyebrow">How it works</p>
+  <h2>Hub-and-spoke, not point-to-point</h2>
+  <p class="lead">Rather than a maze of pairwise converters, every spec is normalised into one canonical representation — <b>OpenAPI 3.1</b> — and then written out to whatever you asked for. Add a format once as an importer and an exporter, and it converts to and from everything else.</p>
+  <div class="hub">
+    <div class="col">
+      <div class="node">Swagger 2.0</div>
+      <div class="node">OpenAPI 3.0</div>
+      <div class="node">OpenAPI 3.1</div>
+    </div>
+    <div style="text-align:center">
+      <div class="arrow" style="font-size:22px">→</div>
+      <div class="hubcore"><b>OpenAPI 3.1</b><span>canonical hub<br/>+ warnings log</span></div>
+      <div class="arrow" style="font-size:22px">→</div>
+    </div>
+    <div class="col">
+      <div class="node">Swagger 2.0</div>
+      <div class="node">OpenAPI 3.0</div>
+      <div class="node">OpenAPI 3.1</div>
+    </div>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="n"></div><div><b>Detect</b><span>The source format and version are recognised automatically (you can override).</span></div></div>
+    <div class="step"><div class="n"></div><div><b>Import → normalise</b><span>The spec is upgraded into the OpenAPI 3.1 hub, collecting warnings for anything lossy.</span></div></div>
+    <div class="step"><div class="n"></div><div><b>Export</b><span>The hub is written out to your target version — downgrades flag every feature that can’t make the trip.</span></div></div>
+  </div>
+</div></section>
+
+<section id="fidelity"><div class="wrap">
+  <p class="eyebrow">Honest about fidelity</p>
+  <h2>Some conversions cost more than others</h2>
+  <p class="lead">Upgrades are essentially lossless. Downgrades trade away features the older spec can’t express — and the tool tells you exactly which, instead of pretending nothing changed.</p>
+  <div class="grid g3">
+    <div class="card"><span class="tag t-full">Full / High</span><h3 style="margin-top:10px">OpenAPI 2.0 → 3.0 → 3.1</h3><p>Version upgrades within the OpenAPI family carry everything across.</p></div>
+    <div class="card"><span class="tag t-lossy">Lossy (flagged)</span><h3 style="margin-top:10px">3.1 → 3.0 → 2.0</h3><p>Type unions, webhooks, multiple examples, JSON-Schema-2020 keywords, callbacks — each collapse or drop is warned.</p></div>
+    <div class="card"><span class="tag t-soon">Coming</span><h3 style="margin-top:10px">Beyond OpenAPI</h3><p>Postman, RAML, AsyncAPI, GraphQL and gRPC are recognised today and honestly marked “not supported yet.”</p></div>
+  </div>
+</div></section>
+
+<section id="formats"><div class="wrap">
+  <p class="eyebrow">Coverage</p>
+  <h2>Supported today, and on the way</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Format</th><th>As source</th><th>As target</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Swagger 2.0</td><td>Yes</td><td>Yes (lossy)</td><td><span class="tag t-full">Live</span></td></tr>
+      <tr><td>OpenAPI 3.0.x</td><td>Yes</td><td>Yes</td><td><span class="tag t-full">Live</span></td></tr>
+      <tr><td>OpenAPI 3.1.x</td><td>Yes</td><td>Yes</td><td><span class="tag t-full">Live</span></td></tr>
+      <tr><td>Postman / RAML / AsyncAPI</td><td>Detected</td><td>—</td><td><span class="tag t-soon">Planned</span></td></tr>
+      <tr><td>GraphQL SDL / gRPC (proto)</td><td>Detected</td><td>—</td><td><span class="tag t-soon">Planned</span></td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section class="final"><div class="wrap">
+  <h2>Convert your spec now</h2>
+  <p class="lead" style="margin:12px auto 0">It opens instantly and works offline once loaded.</p>
+  <div class="cta" style="margin-top:24px"><a class="btn primary" href="./app/">Open the converter →</a></div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>API Spec Converter · runs entirely client-side · no account · no upload.</span>
+  <span>Canonical hub: OpenAPI 3.1 · <a href="./app/">Launch the tool</a></span>
+</div></footer>
+</body>
+</html>

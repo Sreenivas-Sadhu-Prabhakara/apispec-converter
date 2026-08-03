@@ -1,0 +1,32 @@
+name: Deploy docs to Pages
+
+# This PUBLIC repo holds the explanation site (public/). On push to main it
+# publishes public/ to the gh-pages ROOT. keep_files:true is essential — the
+# converter app is published to /app on the same gh-pages branch by the PRIVATE
+# source repo's CI, and must not be wiped.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages-docs
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish docs to gh-pages root
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./public
+          keep_files: true
+          commit_message: "docs: ${{ github.sha }}"
